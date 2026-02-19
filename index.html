@@ -52,7 +52,7 @@
     .page-frame {
       width: 100%; max-width: 420px; flex: 1;
       display: flex; flex-direction: column;
-      position: relative; padding: 10px 14px 10px;
+      position: relative; padding: 6px 14px 6px;
     }
     .page-frame::before {
       content: ''; position: absolute; inset: 4px;
@@ -69,7 +69,7 @@
     .corner.bl { bottom: 0; left: 0; transform: scaleY(-1); }
     .corner.br { bottom: 0; right: 0; transform: scale(-1,-1); }
     /* Header */
-    .header { text-align: center; padding: 22px 24px 4px; position: relative; }
+    .header { text-align: center; padding: 14px 24px 2px; position: relative; }
     .rubric-line {
       font-family: 'IM Fell English', serif; font-style: italic;
       font-size: 9px; letter-spacing: 0.22em; color: var(--crimson);
@@ -101,7 +101,7 @@
     }
     .ruled-line {
       display: flex; align-items: center; gap: 8px;
-      margin: 8px 16px 0;
+      margin: 4px 16px 0;
     }
     .ruled-line::before, .ruled-line::after {
       content: ''; flex: 1; height: 1px;
@@ -111,10 +111,10 @@
     /* Column headers */
     .column-headers {
       display: flex; justify-content: center; gap: 5px;
-      margin: 14px 20px 6px;
+      margin: 8px 20px 4px;
     }
     .col-header {
-      flex: 1; max-width: 58px; height: 46px;
+      flex: 1; max-width: 58px; height: 38px;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       font-family: 'UnifrakturMaguntia', cursive; font-size: 28px;
       background: rgba(200,150,12,0.07);
@@ -138,11 +138,11 @@
       box-shadow: 0 2px 10px rgba(200,150,12,0.25);
     }
     /* Call display */
-    .call-container { margin: 14px 16px 6px; position: relative; }
+    .call-container { margin: 8px 16px 4px; position: relative; }
     .call-display {
       background: rgba(250,240,210,0.65);
       border: 1px solid var(--gold-dark);
-      padding: 14px 12px 10px;
+      padding: 10px 12px 8px;
       text-align: center; position: relative;
     }
     .call-display::before {
@@ -158,17 +158,17 @@
     }
     .call-value {
       display: flex; align-items: center; justify-content: center;
-      gap: 4px; min-height: 78px;
+      gap: 4px; min-height: 62px;
     }
     .call-letter {
       font-family: 'UnifrakturMaguntia', cursive;
-      font-size: clamp(56px, 17vw, 74px);
+      font-size: clamp(48px, 14vw, 62px);
       line-height: 1; transition: color 0.3s ease;
       -webkit-text-stroke: 0.5px var(--gold-dark);
     }
     .call-number {
       font-family: 'IM Fell English', serif;
-      font-size: clamp(50px, 15vw, 66px);
+      font-size: clamp(42px, 13vw, 56px);
       line-height: 1; color: var(--ink); transition: color 0.3s ease;
     }
     .call-letter.idle { color: rgba(60,43,14,0.18); -webkit-text-stroke: 0.5px rgba(138,100,8,0.12); }
@@ -190,8 +190,8 @@
     }
     /* Draw button */
     .draw-btn {
-      width: calc(100% - 32px); margin: 10px 16px 0;
-      padding: 15px 10px;
+      width: calc(100% - 32px); margin: 6px 16px 0;
+      padding: 11px 10px;
       background: linear-gradient(180deg, #a02020 0%, var(--crimson-dark) 100%);
       border: 1px solid #6a1010; border-bottom: 3px solid #3a0808;
       color: #f5e8c8;
@@ -210,7 +210,7 @@
     .draw-btn:active { transform: translateY(1px); box-shadow: 0 1px 4px rgba(60,0,0,0.3); }
     .draw-btn:disabled { background: #a09268; border-color: #706040; box-shadow: none; opacity: 0.5; cursor: not-allowed; }
     /* History */
-    .history-section { margin: 12px 16px 0; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .history-section { margin: 8px 16px 0; flex: 1; min-height: 0; display: flex; flex-direction: column; }
     .history-header {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 5px; padding-bottom: 4px;
@@ -231,7 +231,7 @@
       background: rgba(240,228,195,0.45);
       border: 1px solid rgba(138,100,8,0.25);
       overflow-y: auto; flex: 1;
-      min-height: 70px; max-height: 155px;
+      min-height: 55px; max-height: 130px;
       align-content: flex-start;
     }
     .history-chip {
