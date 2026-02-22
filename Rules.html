@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jesus Trivia Bingo Scramble – How to Play</title>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=MedievalSharp&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment:    #f2e8c9;
+    --parchment-dk: #e0ceaa;
+    --ink:          #1a0f00;
+    --red:          #8b1a1a;
+    --blue:         #1a3a6b;
+    --gold:         #c8931a;
+    --gold-lt:      #f0c040;
+    --green:        #1a5c2a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'IM Fell English', serif;
+    background: #0d0800;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── SLIDE CONTAINER ── */
+  #deck {
+    position: relative;
+    width: min(960px, 96vw);
+    aspect-ratio: 16/9;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    background: var(--parchment);
+    border: 6px double var(--gold);
+    box-shadow: 0 0 0 2px var(--ink), 0 0 40px rgba(200,147,26,.35), inset 0 0 80px rgba(160,120,40,.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4% 6%;
+    opacity: 0;
+    transform: scale(.94);
+    transition: opacity .45s ease, transform .45s ease;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: all;
+  }
+
+  /* parchment texture overlay */
+  .slide::before {
+    content:'';
+    position: absolute;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .slide > * { position: relative; z-index: 1; }
+
+  /* ── CORNER ORNAMENTS ── */
+  .corner {
+    position: absolute;
+    font-size: clamp(22px, 3.5vw, 42px);
+    color: var(--red);
+    line-height: 1;
+    z-index: 2;
+  }
+  .corner.tl { top: 10px; left: 14px; }
+  .corner.tr { top: 10px; right: 14px; transform: scaleX(-1); }
+  .corner.bl { bottom: 10px; left: 14px; transform: scaleY(-1); }
+  .corner.br { bottom: 10px; right: 14px; transform: scale(-1); }
+
+  /* ── DIVIDERS ── */
+  .divider {
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--gold), var(--red), var(--gold), transparent);
+    margin: 1.2% 0;
+    flex-shrink: 0;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .slide-title {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: clamp(28px, 5.5vw, 64px);
+    color: var(--red);
+    text-align: center;
+    line-height: 1.1;
+    text-shadow: 2px 2px 0 rgba(0,0,0,.18);
+    letter-spacing: .02em;
+  }
+
+  .slide-subtitle {
+    font-family: 'IM Fell English SC', serif;
+    font-size: clamp(11px, 1.6vw, 18px);
+    color: var(--blue);
+    text-align: center;
+    letter-spacing: .18em;
+    margin-top: .3em;
+  }
+
+  .drop-cap::first-letter {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: 3.4em;
+    float: left;
+    line-height: .8;
+    margin-right: .08em;
+    color: var(--red);
+  }
+
+  p.body-text {
+    font-size: clamp(11px, 1.55vw, 18px);
+    color: var(--ink);
+    line-height: 1.65;
+    text-align: justify;
+    max-width: 78ch;
+  }
+
+  /* ── RUBRICATED LISTS ── */
+  ul.manuscript {
+    list-style: none;
+    width: 100%;
+    max-width: 680px;
+  }
+
+  ul.manuscript li {
+    font-size: clamp(10px, 1.45vw, 17px);
+    color: var(--ink);
+    padding: .35em 0 .35em 1.6em;
+    position: relative;
+    line-height: 1.5;
+    border-bottom: 1px solid rgba(200,147,26,.25);
+  }
+
+  ul.manuscript li::before {
+    content: '❧';
+    position: absolute;
+    left: 0;
+    color: var(--red);
+    font-size: 1.1em;
+  }
+
+  ul.manuscript li strong {
+    font-family: 'IM Fell English SC', serif;
+    color: var(--blue);
+  }
+
+  /* ── GRID DEMO ── */
+  .bingo-demo {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    width: clamp(160px, 32vw, 300px);
+    flex-shrink: 0;
+  }
+
+  .bingo-demo .cell {
+    background: var(--parchment-dk);
+    border: 1.5px solid var(--gold);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+    font-size: clamp(8px, 1.2vw, 14px);
+    color: var(--ink);
+    text-align: center;
+    padding: 2px;
+    position: relative;
+  }
+
+  .bingo-demo .cell.header {
+    background: var(--red);
+    color: var(--gold-lt);
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: clamp(10px, 1.5vw, 18px);
+    border-color: var(--ink);
+  }
+
+  .bingo-demo .cell.free {
+    background: var(--blue);
+    color: var(--gold-lt);
+    font-family: Arial, sans-serif;
+    font-size: clamp(6px, .9vw, 10px);
+  }
+
+  .bingo-demo .cell.marked::after {
+    content: '✕';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: serif;
+    font-size: clamp(14px, 2vw, 24px);
+    color: var(--red);
+    font-weight: bold;
+  }
+
+  /* ── COLUMN LAYOUT ── */
+  .two-col {
+    display: flex;
+    gap: 5%;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .two-col .col { flex: 1; }
+
+  /* ── WIN PATTERNS ── */
+  .patterns {
+    display: flex;
+    gap: 3%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .pattern-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pattern-block span {
+    font-family: 'IM Fell English SC', serif;
+    font-size: clamp(7px, 1vw, 11px);
+    color: var(--blue);
+    text-align: center;
+  }
+
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    width: clamp(60px, 9vw, 90px);
+  }
+
+  .mini-grid div {
+    aspect-ratio: 1;
+    background: var(--parchment-dk);
+    border: 1px solid var(--gold);
+  }
+
+  .mini-grid div.h { background: var(--red); }
+  .mini-grid div.f { background: var(--blue); }
+
+  /* ── CALLING BOX ── */
+  .calling-box {
+    background: var(--blue);
+    border: 3px double var(--gold);
+    color: var(--gold-lt);
+    padding: .6em 1.2em;
+    text-align: center;
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: clamp(18px, 3.5vw, 42px);
+    letter-spacing: .05em;
+    box-shadow: 4px 4px 0 var(--ink);
+    width: fit-content;
+    margin: .5em auto;
+  }
+
+  .calling-box sub {
+    font-family: 'IM Fell English SC', serif;
+    font-size: .45em;
+    color: var(--parchment);
+    display: block;
+    letter-spacing: .2em;
+    margin-top: .1em;
+  }
+
+  /* ── SLIDE 1 – TITLE SPECIFIC ── */
+  #slide-1 .big-title {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: clamp(40px, 9vw, 110px);
+    color: var(--red);
+    text-align: center;
+    line-height: .95;
+    text-shadow: 3px 3px 0 rgba(0,0,0,.2);
+  }
+
+  #slide-1 .initials {
+    font-family: 'IM Fell English SC', serif;
+    font-size: clamp(9px, 1.4vw, 16px);
+    color: var(--blue);
+    letter-spacing: .3em;
+    text-align: center;
+    margin-top: .4em;
+  }
+
+  /* ── NAVIGATION ── */
+  #nav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  #nav button {
+    background: var(--red);
+    color: var(--gold-lt);
+    border: 2px solid var(--gold);
+    font-family: 'IM Fell English SC', serif;
+    font-size: clamp(11px, 1.4vw, 15px);
+    padding: .4em 1.2em;
+    cursor: pointer;
+    letter-spacing: .1em;
+    box-shadow: 2px 2px 0 var(--ink);
+    transition: background .15s, transform .1s;
+  }
+
+  #nav button:hover { background: #a82020; transform: translateY(-1px); }
+  #nav button:active { transform: translateY(1px); box-shadow: none; }
+  #nav button:disabled { opacity: .35; cursor: default; transform: none; }
+
+  #slide-counter {
+    font-family: 'IM Fell English SC', serif;
+    font-size: clamp(10px, 1.3vw, 14px);
+    color: var(--parchment);
+    letter-spacing: .12em;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  /* ── PROGRESS ── */
+  #progress {
+    width: min(960px, 96vw);
+    height: 4px;
+    background: #2a1800;
+    margin-top: 6px;
+  }
+
+  #progress-bar {
+    height: 100%;
+    background: linear-gradient(to right, var(--red), var(--gold));
+    transition: width .4s ease;
+  }
+
+  /* ── SLIDE 7 – CALLING ── */
+  .letter-col-demo {
+    display: flex;
+    gap: 2%;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .letter-col {
+    flex: 1;
+    max-width: 120px;
+    text-align: center;
+  }
+
+  .letter-col .lh {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: clamp(16px, 2.6vw, 30px);
+    color: var(--red);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: .2em;
+    margin-bottom: .3em;
+  }
+
+  .letter-col .ln {
+    font-size: clamp(9px, 1.2vw, 13px);
+    color: var(--ink);
+    line-height: 1.9;
+    font-family: 'IM Fell English SC', serif;
+  }
+
+  /* ── CELEBRATION (last slide) ── */
+  .glory {
+    font-family: 'UnifrakturMaguntia', cursive;
+    font-size: clamp(28px, 6vw, 72px);
+    color: var(--red);
+    text-align: center;
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
+    from { text-shadow: 0 0 8px var(--gold), 2px 2px 0 rgba(0,0,0,.2); }
+    to   { text-shadow: 0 0 22px var(--gold-lt), 0 0 6px var(--red), 2px 2px 0 rgba(0,0,0,.2); }
+  }
+
+  .bless {
+    font-style: italic;
+    font-size: clamp(10px, 1.5vw, 17px);
+    color: var(--blue);
+    text-align: center;
+    margin-top: .6em;
+  }
+</style>
+</head>
+<body>
+
+<div id="deck">
+
+  <!-- SLIDE 1 – TITLE -->
+  <div class="slide active" id="slide-1">
+    <span class="corner tl">☩</span><span class="corner tr">☩</span>
+    <span class="corner bl">☩</span><span class="corner br">☩</span>
+    <div class="big-title">Jesus<br>Trivia Bingo<br>Scramble</div>
+    <div class="divider"></div>
+    <div class="initials">
+      J · E · S · U · S &nbsp;&nbsp;·&nbsp;&nbsp; Trivia &amp; Bingo &amp; Fellowship
+    </div>
+    <div class="divider"></div>
+    <p style="font-style:italic; font-size:clamp(9px,1.2vw,14px); color:var(--blue); text-align:center; margin-top:.4em;">
+      How to Play &nbsp;✦&nbsp; Rules for All Ages
+    </p>
+  </div>
+
+  <!-- SLIDE 2 – ROUND SUMMARY -->
+  <div class="slide" id="slide-2">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div class="slide-title">The Four Rounds of Play</div>
+    <div class="divider"></div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:clamp(4px,1vw,10px); width:94%; flex:1; margin-top:.3em;">
+
+      <!-- Round I -->
+      <div style="background:var(--parchment-dk); border:2px solid var(--gold); padding:.5em .7em; display:flex; flex-direction:column; gap:.25em;">
+        <div style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,2vw,22px); color:var(--red); border-bottom:1px solid var(--gold); padding-bottom:.2em;">Round 1</div>
+        <div style="display:flex; align-items:center; gap:.5em; flex-wrap:wrap;">
+          <span style="background:var(--red); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">⚡ Lightning Trivia</span>
+          <span style="color:var(--gold); font-size:clamp(10px,1.4vw,16px);">▸</span>
+          <span style="background:var(--green); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">🪙 Up to 15 Tokens</span>
+          <span style="color:var(--gold); font-size:clamp(10px,1.4vw,16px);">▸</span>
+          <span style="background:var(--blue); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">🎯 Bingo Round</span>
+        </div>
+        <p style="font-size:clamp(8px,1.1vw,13px); color:var(--ink); font-family:'IM Fell English',serif; line-height:1.45; margin-top:.1em;">
+          Easy trivia questions earn tokens to place on your card, then the Caller draws numbers until a team completes a winning pattern.
+        </p>
+      </div>
+
+      <!-- Round II -->
+      <div style="background:var(--parchment-dk); border:2px solid var(--gold); padding:.5em .7em; display:flex; flex-direction:column; gap:.25em;">
+        <div style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,2vw,22px); color:var(--red); border-bottom:1px solid var(--gold); padding-bottom:.2em;">Round 2</div>
+        <div style="display:flex; align-items:center; gap:.5em; flex-wrap:wrap;">
+          <span style="background:var(--red); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">📜 Team Trivia</span>
+          <span style="color:var(--gold); font-size:clamp(10px,1.4vw,16px);">▸</span>
+          <span style="background:var(--green); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">🪙 Up to 8 Tokens</span>
+          <span style="color:var(--gold); font-size:clamp(10px,1.4vw,16px);">▸</span>
+          <span style="background:var(--blue); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">🎯 Bingo Round</span>
+        </div>
+        <p style="font-size:clamp(8px,1.1vw,13px); color:var(--ink); font-family:'IM Fell English',serif; line-height:1.45; margin-top:.1em;">
+          All teams answer the same questions to earn more tokens, then Bingo resumes — cards carry over from Round 1.
+        </p>
+      </div>
+
+      <!-- Round III -->
+      <div style="background:var(--parchment-dk); border:2px solid var(--gold); padding:.5em .7em; display:flex; flex-direction:column; gap:.25em;">
+        <div style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,2vw,22px); color:var(--red); border-bottom:1px solid var(--gold); padding-bottom:.2em;">Round 3</div>
+        <div style="display:flex; align-items:center; gap:.5em; flex-wrap:wrap;">
+          <span style="background:var(--red); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">📜 Team Trivia</span>
+          <span style="color:var(--gold); font-size:clamp(10px,1.4vw,16px);">▸</span>
+          <span style="background:var(--green); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">🪙 Up to 9 Tokens</span>
+          <span style="color:var(--gold); font-size:clamp(10px,1.4vw,16px);">▸</span>
+          <span style="background:var(--blue); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">🎯 Bingo Round</span>
+        </div>
+        <p style="font-size:clamp(8px,1.1vw,13px); color:var(--ink); font-family:'IM Fell English',serif; line-height:1.45; margin-top:.1em;">
+          Another round of shared trivia earns tokens, then Bingo continues — cards carry over from Round 2.
+        </p>
+      </div>
+
+      <!-- Round IV -->
+      <div style="background:var(--blue); border:2px solid var(--gold); padding:.5em .7em; display:flex; flex-direction:column; gap:.25em;">
+        <div style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,2vw,22px); color:var(--gold-lt); border-bottom:1px solid var(--gold); padding-bottom:.2em;">Round 4</div>
+        <div style="display:flex; align-items:center; gap:.5em; flex-wrap:wrap;">
+          <span style="background:var(--gold); color:var(--ink); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">✦ Final Question</span>
+          <span style="color:var(--gold-lt); font-size:clamp(10px,1.4vw,16px);">▸</span>
+          <span style="background:var(--gold); color:var(--ink); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">🪙 Up to 10 Tokens</span>
+          <span style="color:var(--gold-lt); font-size:clamp(10px,1.4vw,16px);">▸</span>
+          <span style="background:var(--red); color:var(--parchment); font-family:'IM Fell English SC',serif; font-size:clamp(7px,1vw,11px); padding:.15em .5em; white-space:nowrap;">💥 Blackout!</span>
+        </div>
+        <p style="font-size:clamp(8px,1.1vw,13px); color:var(--parchment); font-family:'IM Fell English',serif; line-height:1.45; margin-top:.1em;">
+          One final question worth 10 tokens, then Bingo plays to full Blackout — all 25 squares. Unclaimed bonus conditions are also awarded this round.
+        </p>
+      </div>
+
+    </div>
+
+    <p style="font-family:'IM Fell English',serif; font-style:italic; font-size:clamp(7px,1vw,12px); color:var(--blue); text-align:center; margin-top:.4em;">
+      Trivia earns you a head start — Bingo decides the winner.
+    </p>
+  </div>
+
+  <!-- SLIDE 3 – THE CARD -->
+  <div class="slide" id="slide-3">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div class="slide-title">Your Bingo Card</div>
+    <div class="divider"></div>
+    <div class="two-col" style="align-items:center; gap:4%;">
+      <div class="col">
+        <div class="bingo-demo">
+          <!-- Headers -->
+          <div class="cell header">J</div>
+          <div class="cell header">E</div>
+          <div class="cell header">S</div>
+          <div class="cell header">U</div>
+          <div class="cell header">S</div>
+          <!-- Row 1 -->
+          <div class="cell marked">5</div><div class="cell">22</div><div class="cell">38</div><div class="cell">48</div><div class="cell">63</div>
+          <!-- Row 2 -->
+          <div class="cell">12</div><div class="cell marked">29</div><div class="cell">41</div><div class="cell">55</div><div class="cell">71</div>
+          <!-- Row 3 FREE -->
+          <div class="cell marked">8</div><div class="cell">31</div><div class="cell free">Free<br>Space</div><div class="cell">52</div><div class="cell marked">67</div>
+          <!-- Row 4 -->
+          <div class="cell">3</div><div class="cell">19</div><div class="cell marked">44</div><div class="cell">60</div><div class="cell">74</div>
+          <!-- Row 5 -->
+          <div class="cell">14</div><div class="cell">26</div><div class="cell">35</div><div class="cell marked">57</div><div class="cell">70</div>
+        </div>
+      </div>
+      <div class="col">
+        <ul class="manuscript">
+          <li>Each card is a <strong>5×5 grid</strong> of numbers</li>
+          <li>Column <strong>J</strong> holds numbers <strong>1–15</strong></li>
+          <li>Column <strong>E</strong> holds numbers <strong>16–30</strong></li>
+          <li>Column <strong>S</strong> holds numbers <strong>31–45</strong></li>
+          <li>Column <strong>U</strong> holds numbers <strong>46–60</strong></li>
+          <li>Column <strong>S</strong> holds numbers <strong>61–75</strong></li>
+          <li>The <strong>centre square</strong> is a Free Space — already marked!</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4 – THE CALLER -->
+  <div class="slide" id="slide-4">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div class="slide-title">The Caller</div>
+    <div class="divider"></div>
+    <p class="body-text" style="text-align:center; margin-bottom:.6em;">
+      One person serves as the <em>Caller</em>. The Caller draws tiles (or balls)
+      one at a time from the pool of 75 and announces each one clearly to all players.
+    </p>
+    <div class="calling-box">
+      J · 12
+      <sub>announce each draw loudly &amp; clearly</sub>
+    </div>
+    <p class="body-text" style="text-align:center; margin-top:.6em; font-size:clamp(9px,1.25vw,15px); color:var(--blue); font-style:italic;">
+      The Caller keeps a record of every number drawn so disputed wins can be verified.
+    </p>
+  </div>
+
+  <!-- SLIDE 5 – MARKING YOUR CARD -->
+  <div class="slide" id="slide-5">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div class="slide-title">Marking Your Card</div>
+    <div class="divider"></div>
+    <p class="body-text" style="text-align:center; margin-bottom:.5em;">
+      When a number is called that appears on your card, <strong>mark it</strong>.
+    </p>
+    <ul class="manuscript" style="max-width:580px;">
+      <li><strong>Physical cards</strong> — place one of the tokens earned during the trivia round on the square</li>
+      <li>Listen carefully — the letter is always announced <em>before</em> the number <span style="color:var(--red);">(e.g. "J, twelve")</span></li>
+      <li>You only need to check the column matching that letter — not the whole card</li>
+      <li>The <strong>Free Space</strong> is always considered marked from the start</li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 6 – GAME FLOW OVERVIEW -->
+  <div class="slide" id="slide-6">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div class="slide-title">How the Game is Played</div>
+    <div class="divider"></div>
+    <p class="body-text" style="text-align:center; margin-bottom:.5em; font-size:clamp(9px,1.2vw,14px);">
+      The game unfolds across <strong style="color:var(--red);">four rounds</strong>, each pairing a trivia phase with a Bingo phase:
+    </p>
+
+    <!-- Overview table -->
+    <table style="width:95%; max-width:700px; border-collapse:collapse; font-family:'IM Fell English',serif;">
+      <thead>
+        <tr>
+          <th style="font-family:'IM Fell English SC',serif; font-size:clamp(8px,1.1vw,13px); color:var(--parchment); background:var(--ink); border:2px solid var(--gold); padding:.35em .5em; text-align:center; letter-spacing:.06em; width:12%;">Round</th>
+          <th style="font-family:'IM Fell English SC',serif; font-size:clamp(8px,1.1vw,13px); color:var(--parchment); background:var(--ink); border:2px solid var(--gold); padding:.35em .5em; text-align:left; letter-spacing:.06em; width:38%;">Trivia Phase</th>
+          <th style="font-family:'IM Fell English SC',serif; font-size:clamp(8px,1.1vw,13px); color:var(--parchment); background:var(--ink); border:2px solid var(--gold); padding:.35em .5em; text-align:left; letter-spacing:.06em; width:50%;">Bingo Phase &amp; Win Condition</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:var(--parchment-dk);">
+          <td style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(14px,2vw,22px); color:var(--red); border:1.5px solid var(--gold); padding:.35em .5em; text-align:center;">1</td>
+          <td style="font-size:clamp(8px,1.15vw,13px); color:var(--ink); border:1.5px solid var(--gold); padding:.35em .5em;">⚡ <strong>Lightning Round</strong> — up to <strong style="color:var(--red);">15 tokens</strong> per correct answer</td>
+          <td style="font-size:clamp(8px,1.15vw,13px); color:var(--ink); border:1.5px solid var(--gold); padding:.35em .5em;">🎯 Play until a team hits a winning condition <span style="color:var(--blue); font-style:italic;">(Vertical, Horizontal, Diagonal, or Both)</span></td>
+        </tr>
+        <tr style="background:var(--parchment);">
+          <td style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(14px,2vw,22px); color:var(--red); border:1.5px solid var(--gold); padding:.35em .5em; text-align:center;">2</td>
+          <td style="font-size:clamp(8px,1.15vw,13px); color:var(--ink); border:1.5px solid var(--gold); padding:.35em .5em;">📜 <strong>Team Questions</strong> — all teams answer the same questions, earn up to <strong style="color:var(--red);">8 tokens</strong></td>
+          <td style="font-size:clamp(8px,1.15vw,13px); color:var(--ink); border:1.5px solid var(--gold); padding:.35em .5em;">🎯 Play until a team hits a winning condition <span style="color:var(--blue); font-style:italic;">(Vertical, Horizontal, Diagonal, or Both)</span></td>
+        </tr>
+        <tr style="background:var(--parchment-dk);">
+          <td style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(14px,2vw,22px); color:var(--red); border:1.5px solid var(--gold); padding:.35em .5em; text-align:center;">3</td>
+          <td style="font-size:clamp(8px,1.15vw,13px); color:var(--ink); border:1.5px solid var(--gold); padding:.35em .5em;">📜 <strong>Team Questions</strong> — all teams answer together, earn up to <strong style="color:var(--red);">9 tokens</strong></td>
+          <td style="font-size:clamp(8px,1.15vw,13px); color:var(--ink); border:1.5px solid var(--gold); padding:.35em .5em;">🎯 Play until a team hits a winning condition <span style="color:var(--blue); font-style:italic;">(Vertical, Horizontal, Diagonal, or Both)</span></td>
+        </tr>
+        <tr style="background:var(--blue);">
+          <td style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(14px,2vw,22px); color:var(--gold-lt); border:2px solid var(--ink); padding:.35em .5em; text-align:center;">4</td>
+          <td style="font-size:clamp(8px,1.15vw,13px); color:var(--gold-lt); border:2px solid var(--ink); padding:.35em .5em;">✦ <strong>Final Question</strong> — one question worth <strong style="color:var(--gold-lt);">10 tokens</strong></td>
+          <td style="font-size:clamp(8px,1.15vw,13px); color:var(--gold-lt); border:2px solid var(--ink); padding:.35em .5em;">💥 Play until <strong>BLACKOUT</strong> — unclaimed bonus conditions also awarded this round</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="body-text" style="text-align:center; margin-top:.45em; font-size:clamp(7px,1vw,12px); color:var(--blue); font-style:italic;">
+      Turn to the next pages for a full breakdown of each round.
+    </p>
+  </div>
+
+  <!-- SLIDE 7 – ROUND 1 -->
+  <div class="slide" id="slide-7">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div style="display:flex; align-items:baseline; gap:.5em; justify-content:center;">
+      <span style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,2vw,22px); color:var(--gold);">Round</span>
+      <span style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(28px,5vw,58px); color:var(--red); line-height:1;">1</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="two-col" style="gap:6%; align-items:flex-start; width:92%; margin-top:.3em;">
+      <!-- Left: Trivia phase -->
+      <div class="col" style="background:var(--parchment-dk); border:2px solid var(--gold); padding:.6em .8em;">
+        <div style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--red); letter-spacing:.1em; margin-bottom:.4em; text-align:center; border-bottom:1px solid var(--gold); padding-bottom:.3em;">⚡ Lightning Round</div>
+        <ul class="manuscript" style="font-size:clamp(8px,1.15vw,13px);">
+          <li>Easy trivia questions asked of all teams</li>
+          <li>Each correct answer earns tokens to place on your bingo card</li>
+          <li>Up to <strong style="color:var(--red);">15 tokens</strong> available this phase</li>
+          <li>Place earned tokens on squares of your choosing</li>
+        </ul>
+      </div>
+      <!-- Right: Bingo phase -->
+      <div class="col" style="background:var(--parchment-dk); border:2px solid var(--gold); padding:.6em .8em;">
+        <div style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--blue); letter-spacing:.1em; margin-bottom:.4em; text-align:center; border-bottom:1px solid var(--gold); padding-bottom:.3em;">🎯 JESUS Bingo — Round 1</div>
+        <ul class="manuscript" style="font-size:clamp(8px,1.15vw,13px);">
+          <li>The Caller begins drawing numbers</li>
+          <li>Mark squares as numbers are called</li>
+          <li>Win condition: <strong>any pattern wins!</strong> — Vertical, Horizontal, Diagonal, or Intersection (Vertical + Horizontal on the same card)</li>
+          <li>First team to call <strong style="color:var(--red);">"JESUS!"</strong> and be verified ends the round</li>
+        </ul>
+      </div>
+    </div>
+    <p class="body-text" style="text-align:center; margin-top:.5em; font-size:clamp(7px,1vw,12px); color:var(--blue); font-style:italic;">
+      Tokens earned in trivia give your team a head start — spend them wisely!
+    </p>
+  </div>
+
+  <!-- SLIDE 8 – ROUND 2 -->
+  <div class="slide" id="slide-8">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div style="display:flex; align-items:baseline; gap:.5em; justify-content:center;">
+      <span style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,2vw,22px); color:var(--gold);">Round</span>
+      <span style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(28px,5vw,58px); color:var(--red); line-height:1;">2</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="two-col" style="gap:6%; align-items:flex-start; width:92%; margin-top:.3em;">
+      <div class="col" style="background:var(--parchment-dk); border:2px solid var(--gold); padding:.6em .8em;">
+        <div style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--red); letter-spacing:.1em; margin-bottom:.4em; text-align:center; border-bottom:1px solid var(--gold); padding-bottom:.3em;">📜 Team Questions</div>
+        <ul class="manuscript" style="font-size:clamp(8px,1.15vw,13px);">
+          <li>All teams answer the <strong>same set</strong> of trivia questions</li>
+          <li>Each correct answer earns tokens for your bingo card</li>
+          <li>Up to <strong style="color:var(--red);">8 tokens</strong> available this phase</li>
+          <li>Place earned tokens on squares of your choosing</li>
+        </ul>
+      </div>
+      <div class="col" style="background:var(--parchment-dk); border:2px solid var(--gold); padding:.6em .8em;">
+        <div style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--blue); letter-spacing:.1em; margin-bottom:.4em; text-align:center; border-bottom:1px solid var(--gold); padding-bottom:.3em;">🎯 JESUS Bingo — Round 2</div>
+        <ul class="manuscript" style="font-size:clamp(8px,1.15vw,13px);">
+          <li>The Caller resumes drawing numbers</li>
+          <li>Continue marking your card from Round 1</li>
+          <li>Win condition: <strong>Vertical, Horizontal, Diagonal,</strong> or <strong>Both</strong> (Caller announces before play)</li>
+          <li>First team to call <strong style="color:var(--red);">"JESUS!"</strong> and be verified ends the round</li>
+        </ul>
+      </div>
+    </div>
+    <p class="body-text" style="text-align:center; margin-top:.5em; font-size:clamp(7px,1vw,12px); color:var(--blue); font-style:italic;">
+      Cards carry over — every token already placed remains on your card.
+    </p>
+  </div>
+
+  <!-- SLIDE 9 – ROUND 3 -->
+  <div class="slide" id="slide-9">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div style="display:flex; align-items:baseline; gap:.5em; justify-content:center;">
+      <span style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,2vw,22px); color:var(--gold);">Round</span>
+      <span style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(28px,5vw,58px); color:var(--red); line-height:1;">3</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="two-col" style="gap:6%; align-items:flex-start; width:92%; margin-top:.3em;">
+      <div class="col" style="background:var(--parchment-dk); border:2px solid var(--gold); padding:.6em .8em;">
+        <div style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--red); letter-spacing:.1em; margin-bottom:.4em; text-align:center; border-bottom:1px solid var(--gold); padding-bottom:.3em;">📜 Team Questions</div>
+        <ul class="manuscript" style="font-size:clamp(8px,1.15vw,13px);">
+          <li>All teams answer the <strong>same set</strong> of trivia questions</li>
+          <li>Each correct answer earns tokens for your bingo card</li>
+          <li>Up to <strong style="color:var(--red);">9 tokens</strong> available this phase</li>
+          <li>Place earned tokens on squares of your choosing</li>
+        </ul>
+      </div>
+      <div class="col" style="background:var(--parchment-dk); border:2px solid var(--gold); padding:.6em .8em;">
+        <div style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--blue); letter-spacing:.1em; margin-bottom:.4em; text-align:center; border-bottom:1px solid var(--gold); padding-bottom:.3em;">🎯 JESUS Bingo — Round 3</div>
+        <ul class="manuscript" style="font-size:clamp(8px,1.15vw,13px);">
+          <li>The Caller resumes drawing numbers</li>
+          <li>Continue marking your card from prior rounds</li>
+          <li>Win condition: <strong>Vertical, Horizontal, Diagonal,</strong> or <strong>Both</strong> (Caller announces before play)</li>
+          <li>First team to call <strong style="color:var(--red);">"JESUS!"</strong> and be verified ends the round</li>
+        </ul>
+      </div>
+    </div>
+    <p class="body-text" style="text-align:center; margin-top:.5em; font-size:clamp(7px,1vw,12px); color:var(--blue); font-style:italic;">
+      Cards carry over — every token already placed remains on your card.
+    </p>
+  </div>
+
+  <!-- SLIDE 10 – ROUND 4 -->
+  <div class="slide" id="slide-10">
+    <span class="corner tl">☩</span><span class="corner tr">☩</span>
+    <span class="corner bl">☩</span><span class="corner br">☩</span>
+    <div style="display:flex; align-items:baseline; gap:.5em; justify-content:center;">
+      <span style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,2vw,22px); color:var(--gold);">Round</span>
+      <span style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(28px,5vw,58px); color:var(--red); line-height:1;">4</span>
+    </div>
+    <div class="divider"></div>
+
+    <div class="two-col" style="gap:6%; align-items:flex-start; width:92%; margin-top:.3em;">
+      <div class="col" style="background:var(--blue); border:2px solid var(--gold); padding:.6em .8em;">
+        <div style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--gold-lt); letter-spacing:.1em; margin-bottom:.4em; text-align:center; border-bottom:1px solid var(--gold); padding-bottom:.3em;">✦ Final Question</div>
+        <ul class="manuscript" style="font-size:clamp(8px,1.15vw,13px);">
+          <li style="color:var(--parchment); border-bottom-color:rgba(200,147,26,.3);">A single question is posed to all teams</li>
+          <li style="color:var(--parchment); border-bottom-color:rgba(200,147,26,.3);">Correct answer earns <strong style="color:var(--gold-lt);">10 tokens</strong></li>
+          <li style="color:var(--parchment); border-bottom-color:rgba(200,147,26,.3);">Place earned tokens on remaining squares</li>
+        </ul>
+      </div>
+      <div class="col" style="background:var(--blue); border:2px solid var(--gold); padding:.6em .8em;">
+        <div style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--gold-lt); letter-spacing:.1em; margin-bottom:.4em; text-align:center; border-bottom:1px solid var(--gold); padding-bottom:.3em;">💥 JESUS Bingo — BLACKOUT</div>
+        <ul class="manuscript" style="font-size:clamp(8px,1.15vw,13px);">
+          <li style="color:var(--parchment); border-bottom-color:rgba(200,147,26,.3);">Win condition: all <strong style="color:var(--gold-lt);">25 squares</strong> must be marked</li>
+          <li style="color:var(--parchment); border-bottom-color:rgba(200,147,26,.3);">Any bonus conditions not yet claimed can be awarded during this phase</li>
+          <li style="color:var(--parchment); border-bottom-color:rgba(200,147,26,.3);">First team to complete BLACKOUT wins the round — and the game!</li>
+        </ul>
+      </div>
+    </div>
+    <p class="body-text" style="text-align:center; margin-top:.5em; font-size:clamp(7px,1vw,12px); color:var(--gold); font-style:italic;">
+      ✦ &nbsp; The Final Round — may the Lord guide your tokens home. &nbsp; ✦
+    </p>
+  </div>
+
+  <!-- SLIDE 11 – SCORING -->
+  <div class="slide" id="slide-11">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div class="slide-title">Points &amp; Bonuses</div>
+    <div class="divider"></div>
+    <p class="body-text" style="text-align:center; margin-bottom:.55em; font-size:clamp(9px,1.25vw,14px);">
+      Bonus points are awarded to the <em>first player</em> to achieve each milestone:
+    </p>
+
+    <table style="width:90%; max-width:620px; border-collapse:collapse; font-family:'IM Fell English',serif;">
+      <thead>
+        <tr>
+          <th style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--parchment); background:var(--red); border:2px solid var(--ink); padding:.45em .7em; text-align:left; letter-spacing:.08em;">Achievement</th>
+          <th style="font-family:'IM Fell English SC',serif; font-size:clamp(9px,1.3vw,15px); color:var(--parchment); background:var(--red); border:2px solid var(--ink); padding:.45em .7em; text-align:center; letter-spacing:.08em; white-space:nowrap;">Bonus Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background:var(--parchment-dk);">
+          <td style="font-size:clamp(9px,1.25vw,14px); color:var(--ink); border:1.5px solid var(--gold); padding:.4em .7em;">
+            <span style="color:var(--red); margin-right:.4em;">❧</span>First Diagonal Bingo <span style="font-style:italic; color:var(--blue);">(5 in a diagonal row)</span>
+          </td>
+          <td style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,1.9vw,22px); color:var(--red); border:1.5px solid var(--gold); padding:.4em .7em; text-align:center;">100</td>
+        </tr>
+        <tr style="background:var(--parchment);">
+          <td style="font-size:clamp(9px,1.25vw,14px); color:var(--ink); border:1.5px solid var(--gold); padding:.4em .7em;">
+            <span style="color:var(--red); margin-right:.4em;">❧</span>First Horizontal Bingo <span style="font-style:italic; color:var(--blue);">(5 in a horizontal row)</span>
+          </td>
+          <td style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,1.9vw,22px); color:var(--red); border:1.5px solid var(--gold); padding:.4em .7em; text-align:center;">150</td>
+        </tr>
+        <tr style="background:var(--parchment-dk);">
+          <td style="font-size:clamp(9px,1.25vw,14px); color:var(--ink); border:1.5px solid var(--gold); padding:.4em .7em;">
+            <span style="color:var(--red); margin-right:.4em;">❧</span>First Vertical Bingo <span style="font-style:italic; color:var(--blue);">(5 in a vertical column)</span>
+          </td>
+          <td style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,1.9vw,22px); color:var(--red); border:1.5px solid var(--gold); padding:.4em .7em; text-align:center;">150</td>
+        </tr>
+        <tr style="background:var(--parchment);">
+          <td style="font-size:clamp(9px,1.25vw,14px); color:var(--ink); border:1.5px solid var(--gold); padding:.4em .7em;">
+            <span style="color:var(--red); margin-right:.4em;">❧</span>First Intersection Bonus <span style="font-style:italic; color:var(--blue);">(horizontal + vertical on same card)</span>
+          </td>
+          <td style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(13px,1.9vw,22px); color:var(--red); border:1.5px solid var(--gold); padding:.4em .7em; text-align:center;">100</td>
+        </tr>
+        <tr style="background:var(--blue);">
+          <td style="font-size:clamp(9px,1.25vw,14px); color:var(--gold-lt); border:2px solid var(--ink); padding:.45em .7em; font-family:'IM Fell English SC',serif; letter-spacing:.04em;">
+            <span style="color:var(--gold-lt); margin-right:.4em;">✦</span>First Blackout <span style="font-style:italic; color:var(--parchment);">(all 25 spaces marked)</span>
+          </td>
+          <td style="font-family:'UnifrakturMaguntia',cursive; font-size:clamp(16px,2.4vw,28px); color:var(--gold-lt); border:2px solid var(--ink); padding:.45em .7em; text-align:center; text-shadow:0 0 8px var(--gold);">500</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="body-text" style="text-align:center; margin-top:.5em; font-size:clamp(8px,1.05vw,12px); color:var(--blue); font-style:italic;">
+      Only the first player to achieve each milestone receives the bonus — ties split the points equally.
+    </p>
+  </div>
+
+  <!-- SLIDE 12 – CALLING BINGO -->
+  <div class="slide" id="slide-12">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div class="slide-title">Calling "JESUS!"</div>
+    <div class="divider"></div>
+    <p class="body-text" style="text-align:center; margin-bottom:.5em;">
+      When you complete a winning pattern, call out <strong style="color:var(--red);">"JESUS!"</strong> immediately.
+      Play pauses and the Caller verifies your card.
+    </p>
+    <ul class="manuscript" style="max-width:600px;">
+      <li>Call out <strong>"JESUS!"</strong> as soon as your pattern is complete</li>
+      <li>The Caller will read back your marked squares against drawn numbers</li>
+      <li>If your card is <strong>verified</strong> — you win! 🎉</li>
+      <li>If a number was <strong>not called</strong>, play resumes — no penalty, be careful!</li>
+      <li>If two players call simultaneously, <strong>both</strong> may be declared winners</li>
+    </ul>
+  </div>
+
+  <!-- SLIDE 13 – TIPS -->
+  <div class="slide" id="slide-13">
+    <span class="corner tl">✦</span><span class="corner tr">✦</span>
+    <span class="corner bl">✦</span><span class="corner br">✦</span>
+    <div class="slide-title">Tips for Players</div>
+    <div class="divider"></div>
+    <ul class="manuscript" style="max-width:680px; margin-top:.3em;">
+      <li><strong>Stay attentive</strong> — the Caller will not repeat a number once play continues</li>
+      <li><strong>Multiple cards?</strong> You may play more than one card, but keep them organised</li>
+      <li><strong>Check the column first</strong> — the letter tells you exactly where to look</li>
+      <li><strong>Free Space</strong> is your friend — it counts toward any pattern crossing the centre</li>
+      <li><strong>Have fun!</strong> JESUS Bingo is about fellowship as much as winning</li>
+    </ul>
+    <div class="divider"></div>
+    <p class="body-text" style="text-align:center; font-style:italic; font-size:clamp(9px,1.2vw,14px); color:var(--blue);">
+      "Let all that you do be done in love." — 1 Corinthians 16:14
+    </p>
+  </div>
+
+  <!-- SLIDE 14 – LET'S PLAY -->
+  <div class="slide" id="slide-14">
+    <span class="corner tl">☩</span><span class="corner tr">☩</span>
+    <span class="corner bl">☩</span><span class="corner br">☩</span>
+    <div class="divider"></div>
+    <div class="glory">Let the Game Begin!</div>
+    <div class="divider" style="margin:1em 0;"></div>
+    <p class="bless">
+      Take your card, find your seat, and may the Lord bless your squares.
+    </p>
+    <div class="calling-box" style="margin-top:1em; font-size:clamp(20px,4vw,50px);">
+      JESUS
+      <sub>Good luck &amp; God bless</sub>
+    </div>
+    <div class="divider" style="margin-top:1em;"></div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- PROGRESS BAR -->
+<div id="progress"><div id="progress-bar" style="width:7.14%"></div></div>
+
+<!-- NAV -->
+<div id="nav">
+  <button id="btn-prev" disabled>◂ Prev</button>
+  <span id="slide-counter">Folio 1 of 14</span>
+  <button id="btn-next">Next ▸</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const btnPrev = document.getElementById('btn-prev');
+  const btnNext = document.getElementById('btn-next');
+  const counter = document.getElementById('slide-counter');
+  const progressBar = document.getElementById('progress-bar');
+  let current = 0;
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    counter.textContent = `Folio ${current + 1} of ${slides.length}`;
+    progressBar.style.width = `${((current + 1) / slides.length) * 100}%`;
+    btnPrev.disabled = current === 0;
+    btnNext.disabled = current === slides.length - 1;
+  }
+
+  btnPrev.addEventListener('click', () => current > 0 && goTo(current - 1));
+  btnNext.addEventListener('click', () => current < slides.length - 1 && goTo(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault();
+      current < slides.length - 1 && goTo(current + 1);
+    }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      current > 0 && goTo(current - 1);
+    }
+  });
+</script>
+</body>
+</html>
